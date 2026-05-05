@@ -122,3 +122,16 @@ export const permissionActionEnum = pgEnum("permission_action", [
   "export",
   "admin",
 ]);
+
+// Artifact taxonomy — Studio asset library (migration 0008).
+//   kind   — what type of media (drives the player + adapter routing)
+//   status — async lifecycle (queued → rendering → complete | failed | archived)
+export const artifactKindEnum = pgEnum("artifact_kind", ["video", "image", "audio"]);
+
+export const artifactStatusEnum = pgEnum("artifact_status", [
+  "queued",
+  "rendering",
+  "complete",
+  "failed",
+  "archived",
+]);

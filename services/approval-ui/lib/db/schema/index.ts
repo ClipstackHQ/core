@@ -3,6 +3,7 @@
 
 export * from "./agents";
 export * from "./approvals";
+export * from "./artifacts";
 export * from "./audit";
 export * from "./companies";
 export * from "./content-claims";

@@ -25,6 +25,7 @@ import { withTenant } from "@/lib/db/client";
 import {
   agents,
   approvals,
+  artifacts,
   auditLog,
   companies,
   companyLessons,
@@ -38,6 +39,7 @@ import {
 import type {
   NewAgent,
   NewApproval,
+  NewArtifact,
   NewAuditLogRow,
   NewCompanyLesson,
   NewDraft,
@@ -495,6 +497,7 @@ async function main(): Promise<void> {
     console.log("[seed] wiping any prior demo-tenant rows for idempotency...");
     // Order matters — children before parents. Most tables ON DELETE CASCADE
     // off companies, but cleaning explicitly keeps the script obvious.
+    await tx.delete(artifacts).where(eq(artifacts.companyId, DEMO_COMPANY_ID));
     await tx.delete(meterEvents).where(eq(meterEvents.companyId, DEMO_COMPANY_ID));
     await tx.delete(auditLog).where(eq(auditLog.companyId, DEMO_COMPANY_ID));
     await tx.delete(companyLessons).where(eq(companyLessons.companyId, DEMO_COMPANY_ID));
@@ -850,8 +853,83 @@ async function main(): Promise<void> {
     }
     await tx.insert(meterEvents).values(meterValues).onConflictDoNothing();
 
+    // ─── Studio artifacts (Hyperframes renders) ─────────────────────────
+    // Three sample artifacts: one complete (with a real-feel mediaUrl),
+    // one rendering (so the Studio renders the in-flight UI state),
+    // one failed (so the failure-path rendering is visible too).
+    // The "complete" artifact's mediaUrl points at a placeholder path
+    // that won't actually exist on disk locally — the page renders the
+    // <video> element regardless, and the user sees a play-failed
+    // poster which is the correct "rendered but not on this disk" UX
+    // for cold-start demo.
+    console.log("[seed] inserting 3 sample Studio artifacts...");
+    const artifactValues: NewArtifact[] = [
+      {
+        id: stableUuid(8, 0),
+        companyId: DEMO_COMPANY_ID,
+        kind: "video",
+        source: "hyperframes",
+        title: "Q4 results — 47% YoY growth headline",
+        prompt:
+          "A 10-second LinkedIn announcement video. Three scenes: (1) headline 'Q4 was the strongest quarter on record', (2) the stat '47% YoY revenue growth' in big mono numbers, (3) call-to-action 'Read the full investor brief'.",
+        status: "complete",
+        mediaUrl: "/uploads/hyperframes/sample-q4-headline.mp4",
+        mediaMimeType: "video/mp4",
+        providerMeta: {
+          aspectRatio: "16:9",
+          durationSec: 10,
+          appliedStyleKey: "default",
+          mode: "scene",
+          completedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        },
+        costUsd: 0,
+        createdAt: new Date(Date.now() - 60 * 60 * 1000), // 1h ago
+      },
+      {
+        id: stableUuid(8, 1),
+        companyId: DEMO_COMPANY_ID,
+        kind: "video",
+        source: "hyperframes",
+        title: "Closed-loop pipeline launch — newsletter teaser",
+        prompt:
+          "A 15-second vertical (9:16) Instagram Reels teaser for the closed-loop pipeline launch. Scene 1: 'Predict before publish', Scene 2: 'Measure after', Scene 3: 'Retrain nightly', closing card 'The loop is the company.'",
+        status: "rendering",
+        mediaUrl: null,
+        mediaMimeType: "video/mp4",
+        providerMeta: {
+          aspectRatio: "9:16",
+          durationSec: 15,
+          mode: "scene",
+        },
+        costUsd: 0,
+        createdAt: new Date(Date.now() - 30 * 1000), // 30s ago — actively rendering
+      },
+      {
+        id: stableUuid(8, 2),
+        companyId: DEMO_COMPANY_ID,
+        kind: "video",
+        source: "hyperframes",
+        title: "Open-core split announcement (failed render)",
+        prompt:
+          "A 20-second blog header announcing the three-tier open-core architecture: core/ MIT (public), signals/ proprietary, hosted/ SaaS.",
+        status: "failed",
+        mediaUrl: null,
+        mediaMimeType: "video/mp4",
+        providerMeta: {
+          aspectRatio: "16:9",
+          durationSec: 20,
+          mode: "scene",
+        },
+        errorMessage:
+          "npx hyperframes exited 1. stderr: ffmpeg encoder libx264 not available — install with: brew install ffmpeg --with-libx264 (or set HYPERFRAMES_CODEC=h264_videotoolbox on Apple Silicon).",
+        costUsd: 0,
+        createdAt: new Date(Date.now() - 10 * 60 * 1000), // 10min ago
+      },
+    ];
+    await tx.insert(artifacts).values(artifactValues).onConflictDoNothing();
+
     console.log(
-      `[seed] done — ${AGENT_SPECS.length} agents, ${DRAFT_SPECS.length} drafts, ${approvalRows.length} approvals, ${metricRows.length} post_metrics rows, ${LESSON_SPECS.length} lessons, ${auditValues.length} audit rows, ${meterValues.length} meter events`,
+      `[seed] done — ${AGENT_SPECS.length} agents, ${DRAFT_SPECS.length} drafts, ${approvalRows.length} approvals, ${metricRows.length} post_metrics rows, ${LESSON_SPECS.length} lessons, ${auditValues.length} audit rows, ${meterValues.length} meter events, ${artifactValues.length} artifacts`,
     );
     console.log("[seed] login at http://localhost:3000/login as demo@clipstack.app");
   });

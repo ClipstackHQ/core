@@ -23,6 +23,7 @@ import {
   GitBranch,
   Brain,
   Cpu,
+  Film,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ const sections: NavSection[] = [
       { label: "Mission Control", href: "/",            icon: LayoutDashboard, shortcut: "G H" },
       { label: "Inbox",           href: "/inbox",       icon: Inbox,           shortcut: "G I" },
       { label: "Workspace",       href: "/workspace",   icon: PenLine,         shortcut: "G W" },
+      { label: "Studio",          href: "/studio",      icon: Film,            shortcut: "G S" },
       { label: "Calendar",        href: "/calendar",    icon: Calendar,        shortcut: "G C" },
     ],
   },
