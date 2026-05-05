@@ -12,6 +12,8 @@
 // Each stage shows enabled/connected + emit_count or consumed_count.
 // Errors visible as a tertiary line so the root cause is one read away.
 
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 
 export interface BusStatus {
@@ -130,22 +132,32 @@ export function BusHealthTile({ health }: BusHealthTileProps) {
             redpanda producers + bandit consumer
           </span>
         </div>
-        <span
-          className={`h-2.5 w-2.5 rounded-full ${
-            anyUnreachable
-              ? "bg-status-danger"
-              : anyDegraded
-                ? "bg-status-warning"
-                : "bg-status-success"
-          }`}
-          aria-label={
-            anyUnreachable
-              ? "one or more stages unreachable"
-              : anyDegraded
-                ? "one or more stages degraded"
-                : "all stages live"
-          }
-        />
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${
+              anyUnreachable
+                ? "bg-status-danger"
+                : anyDegraded
+                  ? "bg-status-warning"
+                  : "bg-status-success"
+            }`}
+            aria-label={
+              anyUnreachable
+                ? "one or more stages unreachable"
+                : anyDegraded
+                  ? "one or more stages degraded"
+                  : "all stages live"
+            }
+          />
+          <Link
+            href="/system"
+            className="inline-flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors duration-fast"
+            aria-label="open system health"
+          >
+            details
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       </CardHeader>
 
       <ul className="space-y-3 mt-2">

@@ -837,6 +837,7 @@ export default async function MissionControlPage() {
             trend={kpis.ctr7dTrend}
             size="medium"
             tone="default"
+            href="/performance"
           />
 
           {/* Reach · last 7d. Real data: SUM(reach) over post_metrics
@@ -846,6 +847,7 @@ export default async function MissionControlPage() {
             value={formatReach(kpis.reach7d)}
             trend={kpis.reach7dTrend}
             size="medium"
+            href="/performance"
           />
 
           {/* Crisis monitor — pulses red if active. Currently calm. */}
@@ -886,6 +888,7 @@ export default async function MissionControlPage() {
             trend={kpis.spendMtdTrend}
             size="medium"
             tone="default"
+            href="/performance"
           />
 
           {/* Editorial memory — Doc 7 + USP 5 moat. Real data: counts

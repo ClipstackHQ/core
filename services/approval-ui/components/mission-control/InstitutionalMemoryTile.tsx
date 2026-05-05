@@ -13,6 +13,8 @@
 // stagnant number = the team isn't capturing what it learns; a
 // growing number = the moat is widening.
 
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 
 export interface LessonStats {
@@ -30,9 +32,19 @@ export function InstitutionalMemoryTile({ stats }: InstitutionalMemoryTileProps)
     <Card size="medium" tone="accent" className="flex flex-col">
       <CardHeader>
         <CardLabel>institutional memory</CardLabel>
-        <span className="text-xs text-text-tertiary font-mono tabular-nums">
-          live
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-tertiary font-mono tabular-nums">
+            live
+          </span>
+          <Link
+            href="/memory"
+            className="inline-flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors duration-fast"
+            aria-label="open lessons archive"
+          >
+            browse
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       </CardHeader>
       <div className="space-y-2 text-sm">
         <div className="flex items-baseline gap-2">

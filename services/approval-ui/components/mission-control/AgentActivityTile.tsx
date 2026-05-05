@@ -1,6 +1,8 @@
 // Doc 7 §2.1 agent activity stream tile. Pulse-animated when working.
 // Doc 8 §11.7 — agents as geometric marks, not faces. Hierarchy-of-interaction
 // rule: only the orchestrator gets a chat dock; this is just status.
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 import { AgentMark, type AgentMarkColor, type AgentMarkShape, type AgentStatus } from "@/components/AgentMark";
 
@@ -28,6 +30,14 @@ export function AgentActivityTile({ agents }: { agents: AgentActivity[] }) {
             of {agents.length} working now
           </span>
         </div>
+        <Link
+          href="/agents"
+          className="inline-flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors duration-fast"
+          aria-label="open agents directory"
+        >
+          all agents
+          <ArrowUpRight className="h-3 w-3" />
+        </Link>
       </CardHeader>
 
       <ul className="space-y-2">

@@ -20,6 +20,9 @@ import {
   TrendingUp,
   Settings,
   Activity,
+  GitBranch,
+  Brain,
+  Cpu,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,13 +53,16 @@ const sections: NavSection[] = [
   {
     label: "Insight",
     items: [
+      { label: "Pipeline",        href: "/pipeline",    icon: GitBranch },
       { label: "Performance",     href: "/performance", icon: TrendingUp },
+      { label: "Memory",          href: "/memory",      icon: Brain },
       { label: "Activity",        href: "/activity",    icon: Activity },
     ],
   },
   {
     label: "Team",
     items: [
+      { label: "Agents",          href: "/agents",      icon: Cpu },
       { label: "Members",         href: "/members",     icon: Users },
       { label: "Settings",        href: "/settings",    icon: Settings },
     ],

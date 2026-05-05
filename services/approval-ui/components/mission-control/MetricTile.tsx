@@ -1,4 +1,6 @@
 // Doc 8 §9.2 — secondary metric tile. Single number + sparkline + tone hint.
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 import { Sparkline } from "./Sparkline";
 import { cn } from "@/lib/utils";
@@ -12,6 +14,11 @@ interface MetricTileProps {
   size?: "small" | "medium" | "wide";
   tone?: "default" | "accent" | "success" | "warning" | "danger";
   className?: string;
+  // Optional click-through href. When set, the CardHeader gets an
+  // ArrowUpRight link to the detail surface — keeps the tile lean
+  // when a metric has no deeper view yet.
+  href?: string;
+  hrefLabel?: string;
 }
 
 export function MetricTile({
@@ -23,6 +30,8 @@ export function MetricTile({
   size = "medium",
   tone = "default",
   className,
+  href,
+  hrefLabel = "history",
 }: MetricTileProps) {
   const deltaTone =
     delta === undefined
@@ -37,6 +46,16 @@ export function MetricTile({
     <Card size={size} tone={tone} className={cn("flex flex-col", className)}>
       <CardHeader>
         <CardLabel>{label}</CardLabel>
+        {href && (
+          <Link
+            href={href}
+            className="inline-flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors duration-fast"
+            aria-label={`open ${label} ${hrefLabel}`}
+          >
+            {hrefLabel}
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        )}
       </CardHeader>
       <div className="flex items-baseline gap-2">
         <span className="font-mono tabular-nums text-2xl font-semibold text-text-primary leading-none">

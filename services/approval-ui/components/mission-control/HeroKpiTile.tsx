@@ -1,5 +1,7 @@
 // Doc 7 §2.1 hero KPI tile — predicted-percentile distribution.
 // Numbers always mono with tabular-nums (Doc 8 §11.1 hard rule).
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkline } from "./Sparkline";
@@ -24,7 +26,17 @@ export function HeroKpiTile({ predicted, delta, trend, weeklyShipped }: HeroKpiT
             Calibrated within ±15 points · LightGBM
           </span>
         </div>
-        <Badge variant={tone}>this week</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={tone}>this week</Badge>
+          <Link
+            href="/performance"
+            className="inline-flex items-center gap-1 text-xs text-text-secondary hover:text-text-primary transition-colors duration-fast"
+            aria-label="open performance dashboard"
+          >
+            history
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       </CardHeader>
 
       <div className="flex items-end gap-4 mb-4">
