@@ -1,45 +1,16 @@
-// Placeholder routes — /members, /settings render a stub page with the
-// same shell shape: <h1>{name}</h1> + a Card containing the "Spec in
-// flight" footer text.
+// All four sidebar routes that were "spec in flight" stubs graduated
+// to real pages in this sprint: /workspace, /calendar, /members,
+// /settings. This file asserts each renders seeded data rather than
+// the placeholder copy — catches the same silent-catch-to-empty-state
+// regression class the seeded-data-regression suite covers for the
+// other real pages.
 //
-// /workspace and /calendar GRADUATED to real pages in this sprint —
-// they're now covered by their own dedicated assertions (this file
-// asserts only the still-stub routes, so a regression where /workspace
-// or /calendar accidentally falls back to placeholder copy fails the
-// dedicated test rather than silently passing here).
-//
-// Verifies, per route:
-//   - h1 with the page name renders
-//   - "Spec in flight" footer text renders (sentinel that the placeholder
-//     wasn't replaced silently with a real page that drops the marker)
+// If a future change accidentally reverts any of these to a "spec in
+// flight" stub, the corresponding `not.toBeVisible()` assertion fails
+// and CI catches it at PR time.
 
 import { test, expect } from "@playwright/test";
 
-const PLACEHOLDERS = [
-  { path: "/members", name: "members" },
-  { path: "/settings", name: "settings" },
-] as const;
-
-for (const { path, name } of PLACEHOLDERS) {
-  test(`placeholder page ${path} renders header and "spec in flight"`, async ({
-    page,
-  }) => {
-    await page.goto(path);
-
-    // Each placeholder uses an <h1> with the lowercase route name.
-    await expect(page.locator("main").getByRole("heading", { name, exact: true })).toBeVisible();
-
-    // Footer copy: every placeholder ends with "Spec in flight." Use a
-    // case-insensitive regex so a future copy tweak (e.g. "Spec in flight…")
-    // doesn't make the test brittle.
-    await expect(page.getByText(/spec in flight/i)).toBeVisible();
-  });
-}
-
-// /workspace + /calendar smoke tests — assert seeded data renders rather
-// than the placeholder copy. Catches the same silent-catch-to-empty-state
-// regression class the seeded-data-regression suite covers for the other
-// real pages.
 test("/workspace renders seeded counters (catches silent-fail in fetchWorkspace)", async ({
   page,
 }) => {
@@ -47,11 +18,6 @@ test("/workspace renders seeded counters (catches silent-fail in fetchWorkspace)
   await expect(
     page.locator("main").getByRole("heading", { name: /workspace/i }),
   ).toBeVisible();
-  // The placeholder used to render "spec in flight"; the real workspace
-  // page must not. If the fetcher hits its catch the page reverts to an
-  // empty-counter dashboard but the spec-in-flight copy stays absent —
-  // so we assert on the seeded-data side too: the agent-roster column
-  // shows the agent count, which is non-zero on the seed.
   await expect(page.getByText(/spec in flight/i)).not.toBeVisible();
   await expect(page.getByText(/working now/i)).toBeVisible();
   await expect(page.getByText(/captured/i)).toBeVisible();
@@ -68,4 +34,32 @@ test("/calendar renders seeded scheduled drafts (catches silent-fail in fetchCal
   // Seed schedules 4 drafts in [+22h, +9d]; both upcoming AND recent
   // populate the date-grouped sections.
   await expect(page.getByText(/upcoming/i).first()).toBeVisible();
+});
+
+test("/members renders seeded membership row (catches silent-fail in fetchMembers)", async ({
+  page,
+}) => {
+  await page.goto("/members");
+  await expect(
+    page.locator("main").getByRole("heading", { name: /members/i }),
+  ).toBeVisible();
+  await expect(page.getByText(/spec in flight/i)).not.toBeVisible();
+  // Seed creates 1 owner membership for demo@clipstack.app. If the
+  // fetcher's catch fires we get the empty-state copy ("No active
+  // members"); the assertion below refuses that path.
+  await expect(page.getByText(/active/i).first()).toBeVisible();
+  await expect(page.getByText(/no active members/i)).not.toBeVisible();
+});
+
+test("/settings renders identity + integration list (catches silent-fail in fetchSettings)", async ({
+  page,
+}) => {
+  await page.goto("/settings");
+  await expect(
+    page.locator("main").getByRole("heading", { name: /settings/i }),
+  ).toBeVisible();
+  await expect(page.getByText(/spec in flight/i)).not.toBeVisible();
+  // The integrations + features section anchors the page; "enabled"
+  // wording is stable across env-var combinations.
+  await expect(page.getByText(/integrations \+ features/i)).toBeVisible();
 });
