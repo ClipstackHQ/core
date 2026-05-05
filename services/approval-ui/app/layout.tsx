@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { interVariable, jetbrainsMonoVariable } from "./fonts";
 import "./globals.css";
 import { KeyboardShortcuts } from "@/components/keyboard/KeyboardShortcuts";
+import { DemoBadge } from "@/components/layout/DemoBadge";
 import { ToastProvider } from "@/components/ui/toast";
 
 // Mission Control is the workspace home — never indexed publicly. Per-page
@@ -44,6 +45,11 @@ export default function RootLayout({
       <body>
         <ToastProvider>
           <KeyboardShortcuts />
+          {/* DemoBadge is a server component — surfaces only when the
+              active session is scoped to the seeded demo tenant. Renders
+              null on /login (no session yet) and on production tenants
+              (activeCompanyId !== DEMO_COMPANY_ID). */}
+          <DemoBadge />
           {children}
         </ToastProvider>
       </body>

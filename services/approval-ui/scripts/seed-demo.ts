@@ -20,6 +20,7 @@
 
 import { and, eq } from "drizzle-orm";
 
+import { DEMO_COMPANY_ID, DEMO_USER_ID } from "@/lib/constants/demo";
 import { withTenant } from "@/lib/db/client";
 import {
   agents,
@@ -45,11 +46,11 @@ import type {
 } from "@/lib/db/schema";
 
 // ─── Stable identifiers ────────────────────────────────────────────────────
-// Deterministic UUIDs for the singleton rows; everything else is built from
-// counter-derived UUIDs so re-runs collide rather than duplicate.
+// DEMO_COMPANY_ID + DEMO_USER_ID now imported from lib/constants/demo so the
+// runtime DemoBadge component reads the same value (single source of truth).
+// Everything else is built from counter-derived UUIDs so re-runs collide
+// rather than duplicate.
 
-const DEMO_COMPANY_ID = "00000000-0000-0000-0000-000000000001";
-const DEMO_USER_ID = "00000000-0000-0000-0000-000000000002";
 const DEMO_MEMBERSHIP_ID = "00000000-0000-0000-0000-000000000003";
 
 /**

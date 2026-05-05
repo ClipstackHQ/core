@@ -56,7 +56,27 @@ cd services/approval-ui && pnpm dev --ignore-workspace
 # → http://localhost:3000
 ```
 
-Mission Control's surface is what the seed populates: `/` (bento dashboard with 9 real-data tiles), `/inbox` (pending-approval queue), `/activity` (audit-log feed), `/performance` (KPI history with 7d/30d/12w ranges), `/experiments` + `/experiments/[id]` (bandit drill-down), `/drafts/[id]` (with approve/deny + USP 5 lesson-capture). See `UI_QUICKSTART.md` for the 5-minute walkthrough.
+Mission Control's surface — every tile is real data, every tile click-throughs to a detail page:
+
+| Surface | What it shows |
+|---|---|
+| `/` | Mission Control bento — 9 real-data tiles (HeroKpi, ApprovalQueue, AgentActivity, Experiments, Anomalies, InstitutionalMemory, BusHealth, plus CTR/Reach/Spend metric tiles); every tile has a header link to its detail surface |
+| `/inbox` | Full approval queue, grouped by channel, oldest-first |
+| `/drafts/[id]` | Per-draft detail with approve/deny actions + USP 5 lesson-capture form |
+| `/pipeline` | Publish-pipeline visualization — 5 happy-path stages + 2 terminal branches, with current draft counts at each node |
+| `/performance` | KPI history with 7d/30d/12w range toggle |
+| `/experiments` + `/experiments/[id]` | Bandit list + per-bandit posterior + arm/reward drill-down |
+| `/memory` | Institutional-memory archive — every lesson grouped by scope (forever / topic / client) |
+| `/agents` | Full agent directory with role-mapped AgentMarks, status, job descriptions, tools |
+| `/activity` | Audit-log feed grouped by date |
+| `/system` | Service + bus health detail (3 tiers: closed-loop bus, models + scoring, safety + compliance) |
+| `/workspace` | Workspace at-a-glance — identity, agent roster, codified voice (top forever-scope lessons) |
+| `/calendar` | Editorial calendar — upcoming scheduled drafts + recent published, with unscheduled-loose-ends rail |
+| `/members` | Workspace member directory (active memberships + MFA + WorkOS link status) |
+| `/settings` | Configuration readout: identity, active regimes, integration + features checklist |
+| `/pitch` | Guided tour — 5-beat narrative walkthrough with talking points lifted verbatim for live demos. Bookmarkable; not in sidebar nav |
+
+For a deeper walkthrough of the closed-loop story across these surfaces, open `http://localhost:3000/pitch` after running the seed — it's the in-app teleprompter for investor + design-partner demos. The seeded "Demo Workspace" tenant surfaces a `DEMO DATA · seeded workspace` badge top-right on every page, so live audiences always know whether they're seeing seed data or production.
 
 For the full stack including agent services:
 

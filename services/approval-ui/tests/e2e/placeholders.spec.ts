@@ -63,3 +63,31 @@ test("/settings renders identity + integration list (catches silent-fail in fetc
   // wording is stable across env-var combinations.
   await expect(page.getByText(/integrations \+ features/i)).toBeVisible();
 });
+
+test("/pitch renders 5 narrative beats + talking-point callouts", async ({
+  page,
+}) => {
+  await page.goto("/pitch");
+  await expect(
+    page.locator("main").getByRole("heading", { name: /pitch tour/i, level: 1 }),
+  ).toBeVisible();
+  // Every beat anchors with a "Beat N of 5" label; we check the first
+  // and last to confirm the section list rendered fully.
+  await expect(page.getByText(/Beat 1 of 5/i)).toBeVisible();
+  await expect(page.getByText(/Beat 5 of 5/i)).toBeVisible();
+  // Each beat has a "talking points" callout — 5 sections = 5 cards.
+  const talkingPointsLabels = page.getByText("talking points", { exact: true });
+  await expect(talkingPointsLabels).toHaveCount(5);
+});
+
+test("DemoBadge surfaces 'DEMO DATA · seeded workspace' on Mission Control", async ({
+  page,
+}) => {
+  // The badge renders only when session.activeCompanyId === DEMO_COMPANY_ID.
+  // CI sets AUTH_STUB_COMPANY_ID to the demo UUID so this fires; in prod
+  // (no AUTH_STUB) it stays hidden until a real session lands on the
+  // demo tenant.
+  await page.goto("/");
+  await expect(page.getByText(/DEMO DATA/i)).toBeVisible();
+  await expect(page.getByText(/seeded workspace/i)).toBeVisible();
+});
