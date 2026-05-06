@@ -5,6 +5,7 @@ export * from "./agents";
 export * from "./approvals";
 export * from "./artifacts";
 export * from "./audit";
+export * from "./brand-kits";
 export * from "./companies";
 export * from "./content-claims";
 export * from "./content-embeddings";

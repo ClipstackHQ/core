@@ -31,9 +31,11 @@ import {
 import { getSession } from "@/lib/api/session";
 import { withTenant } from "@/lib/db/client";
 import { agents as agentsTable } from "@/lib/db/schema/agents";
+import { brandKits } from "@/lib/db/schema/brand-kits";
 import { companies } from "@/lib/db/schema/companies";
 import { companyLessons } from "@/lib/db/schema/lessons";
 import { drafts } from "@/lib/db/schema/drafts";
+import { BrandKitImporter } from "@/components/workspace/BrandKitImporter";
 
 export const metadata: Metadata = {
   title: "Workspace · Clipstack",
@@ -96,6 +98,15 @@ interface WorkspaceSnapshot {
     scope: string;
     topicTags: string[];
   }>;
+  // Active brand kit (when one's saved). Drives the BrandKitImporter
+  // existing-state surface so the user sees their saved kit at a glance.
+  brandKit: {
+    primaryColor: string | null;
+    secondaryColor: string | null;
+    accentColor: string | null;
+    fontPrimary: string | null;
+    sourceUrl: string | null;
+  } | null;
 }
 
 const EMPTY_SNAPSHOT: WorkspaceSnapshot = {
@@ -117,6 +128,7 @@ const EMPTY_SNAPSHOT: WorkspaceSnapshot = {
   voiceScoreAvg: null,
   topAgents: [],
   topLessons: [],
+  brandKit: null,
 };
 
 async function fetchWorkspace(): Promise<WorkspaceSnapshot> {
@@ -128,7 +140,7 @@ async function fetchWorkspace(): Promise<WorkspaceSnapshot> {
 
   try {
     return await withTenant(companyId, async (tx) => {
-      const [companyRow, agentStats, lessonStats, draftStats, agentList, lessonList] =
+      const [companyRow, agentStats, lessonStats, draftStats, agentList, lessonList, brandKitRow] =
         await Promise.all([
           tx
             .select({
@@ -187,6 +199,19 @@ async function fetchWorkspace(): Promise<WorkspaceSnapshot> {
             .where(eq(companyLessons.scope, "forever"))
             .orderBy(desc(companyLessons.capturedAt))
             .limit(4),
+          // Active brand kit (the unique-per-company row). Limit 1
+          // because the schema's uniqueIndex enforces single-active.
+          tx
+            .select({
+              primaryColor: brandKits.primaryColor,
+              secondaryColor: brandKits.secondaryColor,
+              accentColor: brandKits.accentColor,
+              fontPrimary: brandKits.fontPrimary,
+              sourceUrl: brandKits.sourceUrl,
+            })
+            .from(brandKits)
+            .where(eq(brandKits.companyId, companyId))
+            .limit(1),
         ]);
 
       const company = companyRow[0];
@@ -232,6 +257,7 @@ async function fetchWorkspace(): Promise<WorkspaceSnapshot> {
           };
         }),
         topLessons: lessonList,
+        brandKit: brandKitRow[0] ?? null,
       };
     });
   } catch (err) {
@@ -438,6 +464,19 @@ export default async function WorkspacePage() {
         {/* Two-column lower body: voice rules (codified lessons in the
             forever scope = your editorial bible) on the left, agent
             roster preview on the right. Both link to deeper surfaces. */}
+        {/* Brand-kit importer — the "brand in at nine" wedge. Lives above
+            the editorial-voice column because typing a URL is the first
+            thing a new workspace owner does. Existing kit summary surfaces
+            inside the card when one's already saved. */}
+        {(await getSession()).activeCompanyId && (
+          <div className="mb-6">
+            <BrandKitImporter
+              companyId={(await getSession()).activeCompanyId!}
+              existing={ws.brandKit}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <section>
             <div className="flex items-baseline gap-2 mb-3 pb-1 border-b border-border-subtle">

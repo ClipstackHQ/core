@@ -62,6 +62,17 @@ test("/digest renders the 'your week in 60 seconds' surface with seeded aggregat
   await expect(page.getByText("render as 60s video", { exact: true })).toBeVisible();
 });
 
+test("/workspace surfaces the brand-in-at-nine importer with seeded brand kit", async ({
+  page,
+}) => {
+  await page.goto("/workspace");
+  // The importer card anchors with its "brand in at nine" CardLabel.
+  await expect(page.getByText("brand in at nine", { exact: true })).toBeVisible();
+  // Seeded brand kit shows "current kit" + the imported source URL.
+  await expect(page.getByText("current kit", { exact: true })).toBeVisible();
+  await expect(page.getByText(/imported from/i)).toBeVisible();
+});
+
 test("/members renders seeded membership row (catches silent-fail in fetchMembers)", async ({
   page,
 }) => {

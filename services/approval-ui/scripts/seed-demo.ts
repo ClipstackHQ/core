@@ -27,6 +27,7 @@ import {
   approvals,
   artifacts,
   auditLog,
+  brandKits,
   companies,
   companyLessons,
   drafts,
@@ -569,6 +570,7 @@ async function main(): Promise<void> {
     console.log("[seed] wiping any prior demo-tenant rows for idempotency...");
     // Order matters — children before parents. Most tables ON DELETE CASCADE
     // off companies, but cleaning explicitly keeps the script obvious.
+    await tx.delete(brandKits).where(eq(brandKits.companyId, DEMO_COMPANY_ID));
     await tx.delete(artifacts).where(eq(artifacts.companyId, DEMO_COMPANY_ID));
     await tx.delete(meterEvents).where(eq(meterEvents.companyId, DEMO_COMPANY_ID));
     await tx.delete(auditLog).where(eq(auditLog.companyId, DEMO_COMPANY_ID));
@@ -1152,6 +1154,42 @@ async function main(): Promise<void> {
       },
     ];
     await tx.insert(artifacts).values(artifactValues).onConflictDoNothing();
+
+    // ─── Brand kit (Slice 3 / lost wedges) ─────────────────────────────
+    // The "brand in at nine" wedge — a saved brand kit so /workspace
+    // renders the existing-kit summary on cold start. Imported from
+    // demo.clipstack.app (the seeded workspace's website). Doc 8
+    // charcoal-and-teal palette + Inter Variable typography to match
+    // Mission Control visually.
+    console.log("[seed] inserting demo brand kit...");
+    await tx.insert(brandKits).values({
+      companyId: DEMO_COMPANY_ID,
+      primaryColor: "#0B0C0E",      // Doc 8 charcoal base
+      secondaryColor: "#14B8A6",    // Doc 8 accent-500 teal
+      accentColor: "#F2A93A",       // Doc 8 amber accent
+      fontPrimary: "Inter Variable",
+      fontSecondary: "JetBrains Mono Variable",
+      toneOfVoice:
+        "Editorial, institutional, grandiose-over-specific. Lead with the user's problem, not the product feature. Cut the third adjective. Avoid hedge words. Two-sentence paragraphs over four. Mono-numerals for every metric.",
+      logoUrl: null,
+      sourceUrl: "https://demo.clipstack.app",
+      inferenceMeta: {
+        method: "seed",
+        seededAt: new Date().toISOString(),
+      },
+    }).onConflictDoNothing();
+    // Back-fill companies.brand_kit_id so /settings reads the active kit.
+    const [kitRow] = await tx
+      .select({ id: brandKits.id })
+      .from(brandKits)
+      .where(eq(brandKits.companyId, DEMO_COMPANY_ID))
+      .limit(1);
+    if (kitRow) {
+      await tx
+        .update(companies)
+        .set({ brandKitId: kitRow.id, updatedAt: new Date() })
+        .where(eq(companies.id, DEMO_COMPANY_ID));
+    }
 
     console.log(
       `[seed] done — ${AGENT_SPECS.length} agents, ${DRAFT_SPECS.length} drafts, ${approvalRows.length} approvals, ${metricRows.length} post_metrics rows, ${LESSON_SPECS.length} lessons, ${auditValues.length} audit rows, ${meterValues.length} meter events, ${artifactValues.length} artifacts`,
