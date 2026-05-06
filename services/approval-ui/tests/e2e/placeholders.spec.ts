@@ -36,6 +36,16 @@ test("/calendar renders seeded scheduled drafts (catches silent-fail in fetchCal
   await expect(page.getByText(/upcoming/i).first()).toBeVisible();
 });
 
+test("/calendar surfaces the approve-week wedge button with seeded pending count", async ({
+  page,
+}) => {
+  await page.goto("/calendar");
+  // The seed creates 6 awaiting_approval drafts with scheduledAt in the
+  // next 7 days. The ApproveWeekButton renders pendingCount=6.
+  await expect(page.getByText("Approve next week", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Approve \d+ drafts/i })).toBeVisible();
+});
+
 test("/members renders seeded membership row (catches silent-fail in fetchMembers)", async ({
   page,
 }) => {

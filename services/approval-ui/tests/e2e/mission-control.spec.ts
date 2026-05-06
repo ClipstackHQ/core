@@ -38,5 +38,9 @@ test("mission control renders with seeded data", async ({ page }) => {
   // Asserting "tile present" is the right floor for the smoke test;
   // count-correctness gets its own targeted test in a follow-up slice.
   await expect(page.getByText("institutional memory", { exact: true })).toBeVisible();
-  await expect(page.getByText(/lessons? captured/i)).toBeVisible();
+  // Use .first() because seed-data draft titles can also contain the
+  // phrase "lessons captured" (e.g. the weekly-wrap newsletter); the
+  // assertion only needs to confirm the institutional-memory tile copy
+  // renders, not that it's the unique occurrence on the page.
+  await expect(page.getByText(/lessons? captured/i).first()).toBeVisible();
 });

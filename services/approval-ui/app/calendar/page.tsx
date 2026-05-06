@@ -25,6 +25,7 @@ import { ArrowLeft } from "lucide-react";
 import { and, eq, gte, inArray, lte, isNotNull, isNull, asc } from "drizzle-orm";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { ApproveWeekButton } from "@/components/calendar/ApproveWeekButton";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -81,15 +82,20 @@ interface CalendarDraft {
 }
 
 interface CalendarBundle {
-  upcoming: CalendarDraft[]; // scheduled + approved (with scheduledAt) — today + next 14 days
+  upcoming: CalendarDraft[]; // scheduled + approved + awaiting_approval (with scheduledAt) — today + next 14 days
   recent: CalendarDraft[];   // published — last 14 days
   unscheduled: CalendarDraft[]; // approved without scheduledAt
+  /** Count of drafts in the next 7 days that are still awaiting approval —
+   *  drives the "approve the week in 60 seconds" wedge button. Computed
+   *  in fetchCalendar so the SSR rendering is consistent with the DB. */
+  approveWeekPendingCount: number;
 }
 
 const EMPTY_BUNDLE: CalendarBundle = {
   upcoming: [],
   recent: [],
   unscheduled: [],
+  approveWeekPendingCount: 0,
 };
 
 async function fetchCalendar(): Promise<CalendarBundle> {
@@ -127,7 +133,10 @@ async function fetchCalendar(): Promise<CalendarBundle> {
               isNotNull(drafts.scheduledAt),
               gte(drafts.scheduledAt, now),
               lte(drafts.scheduledAt, fourteenDaysFromNow),
-              inArray(drafts.status, ["scheduled", "approved"]),
+              // Includes awaiting_approval so the bulk approve-week wedge
+              // has visible drafts to act on. Each row's status badge in
+              // the rendered list distinguishes the lifecycle stage.
+              inArray(drafts.status, ["scheduled", "approved", "awaiting_approval"]),
             ),
           )
           .orderBy(asc(drafts.scheduledAt)),
@@ -209,10 +218,23 @@ async function fetchCalendar(): Promise<CalendarBundle> {
         };
       };
 
+      // The approve-week wedge counts ONLY awaiting_approval drafts
+      // scheduled in the next 7 days. The 14-day upcoming window above
+      // includes status='scheduled' + 'approved' for display; this
+      // narrower count drives the bulk-approval CTA.
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const approveWeekPendingCount = upcomingRows.filter(
+        (r) =>
+          r.status === "awaiting_approval" &&
+          r.scheduledAt !== null &&
+          r.scheduledAt <= sevenDaysFromNow,
+      ).length;
+
       return {
         upcoming: upcomingRows.map((r) => mapRow(r, "scheduledAt")),
         recent: recentRows.map((r) => mapRow(r, "publishedAt")),
         unscheduled: unscheduledRows.map((r) => mapRow(r, null)),
+        approveWeekPendingCount,
       };
     });
   } catch (err) {
@@ -310,6 +332,7 @@ function DraftRow({ draft, dimmed = false }: DraftRowProps) {
 }
 
 export default async function CalendarPage() {
+  const session = await getSession();
   const bundle = await fetchCalendar();
   const todayKey = new Date().toISOString().slice(0, 10);
 
@@ -349,6 +372,13 @@ export default async function CalendarPage() {
             context. Unscheduled approved drafts queue on the right.
           </p>
         </div>
+
+        {session.activeCompanyId && (
+          <ApproveWeekButton
+            companyId={session.activeCompanyId}
+            pendingCount={bundle.approveWeekPendingCount}
+          />
+        )}
 
         <div className="mb-6 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs text-text-tertiary">
           <span>

@@ -347,6 +347,78 @@ const DRAFT_SPECS: DraftSpec[] = [
     scheduledInMinutes: 60 * 24 * 9, // ships in 9 days
     hashtags: ["product", "ml", "case-study"],
   },
+
+  // ─── 6 awaiting_approval (with scheduledAt) — targets for the
+  // "approve the week in 60 seconds" wedge button on /calendar.
+  // These differ from the 4 awaiting_approval drafts above (which have
+  // scheduledAt=null) by being scheduled within the next 7 days. The
+  // ApproveWeekButton flips them to approved on click.
+  {
+    channel: "x",
+    status: "awaiting_approval",
+    title: null,
+    body:
+      "Most AI 'creator tools' compress the marketing department into a chat box. Clipstack does the opposite — it spreads the work across a team of role-specialised agents who each own a stage of the loop, and gives the human the one moment where taste actually matters. That's not a chat box. That's an editor in chief.",
+    predictedPercentile: 71,
+    ageMinutes: 60 * 4,
+    scheduledInMinutes: 60 * 26, // ~26h from now (tomorrow afternoon)
+    hashtags: ["AI", "editorial"],
+  },
+  {
+    channel: "linkedin",
+    status: "awaiting_approval",
+    title: "Why we ship the loop, not the drafting tool",
+    body:
+      "The cheapest version of an AI marketing product is a chat interface that drafts copy. The hardest version is the loop: predict performance before publish, measure after, capture the lesson, retrain. Drafting is a feature; the loop is the company. After ninety days at our design partner we can prove the calibration band tightens and the lesson archive compounds. The drafts are downstream of the system that learns.",
+    predictedPercentile: 76,
+    ageMinutes: 60 * 5,
+    scheduledInMinutes: 60 * 24 * 2 + 60 * 4, // ~52h from now
+    hashtags: ["AI", "marketing", "product"],
+  },
+  {
+    channel: "newsletter",
+    status: "awaiting_approval",
+    title: "The week's wrap: top performers + lessons captured",
+    body:
+      "Three pieces shipped strong this week. The closed-loop launch landed at p82, the editorial-primitives explainer at p76, the long-take essay on persistent memory at p71. Two new lessons in the workspace: avoid 'simply' as a hedge, and lead with the user's problem before the product feature. Both are now vectors the next draft has to clear. See the full digest in /memory.",
+    predictedPercentile: 68,
+    ageMinutes: 60 * 6,
+    scheduledInMinutes: 60 * 24 * 3, // 3 days from now
+    hashtags: ["weekly", "product"],
+  },
+  {
+    channel: "blog",
+    status: "awaiting_approval",
+    title: "Open-core in practice: what we tell self-hosters",
+    body:
+      "Three things every self-hoster gets without a license fee: the orchestration framework (CrewAI + LangGraph), the Mission Control UI shell, and the adapter interfaces. Three things they don't get: the regime YAMLs (MiCA / FCA / ASA / FDA), the per-platform algorithm heuristics, and the vertical-pack persona libraries. CI enforces the boundary — any PR that imports from signals/ inside core/ fails the build. That's the IP split, codified.",
+    predictedPercentile: 69,
+    ageMinutes: 60 * 8,
+    scheduledInMinutes: 60 * 24 * 4, // 4 days from now
+    hashtags: ["open-source", "product", "licensing"],
+  },
+  {
+    channel: "linkedin",
+    status: "awaiting_approval",
+    title: "Specialist tools vs horizontal labs: where Clipstack lives",
+    body:
+      "Specialist marketing tools don't ship the orchestration layer. Horizontal AI labs don't ship the six verticals. Clipstack lives in the gap: one orchestration framework, six tooling categories collapsed into one workflow, vertical packs that compose on top. The integration is the moat — and it's the thing no competitor can deliver without becoming us.",
+    predictedPercentile: 78,
+    ageMinutes: 60 * 10,
+    scheduledInMinutes: 60 * 24 * 5 + 60 * 8, // 5d8h from now
+    hashtags: ["positioning", "AI"],
+  },
+  {
+    channel: "x",
+    status: "awaiting_approval",
+    title: null,
+    body:
+      "Approve a week of content in sixty seconds. The agents already wrote it. The bandit already picked the variants. The predictor already said which ones will land. You confirm taste; the loop ships everything else.",
+    predictedPercentile: 74,
+    ageMinutes: 60 * 12,
+    scheduledInMinutes: 60 * 24 * 6 + 60 * 4, // 6d4h from now
+    hashtags: ["product", "AI"],
+  },
 ];
 
 // ─── Lesson specs ──────────────────────────────────────────────────────────
