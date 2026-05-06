@@ -24,6 +24,7 @@ import {
   Brain,
   Cpu,
   Film,
+  Sparkles,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ const sections: NavSection[] = [
   {
     label: "Insight",
     items: [
+      { label: "Digest",          href: "/digest",      icon: Sparkles, shortcut: "G D" },
       { label: "Pipeline",        href: "/pipeline",    icon: GitBranch },
       { label: "Performance",     href: "/performance", icon: TrendingUp },
       { label: "Memory",          href: "/memory",      icon: Brain },

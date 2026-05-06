@@ -46,6 +46,22 @@ test("/calendar surfaces the approve-week wedge button with seeded pending count
   await expect(page.getByRole("button", { name: /Approve \d+ drafts/i })).toBeVisible();
 });
 
+test("/digest renders the 'your week in 60 seconds' surface with seeded aggregations", async ({
+  page,
+}) => {
+  await page.goto("/digest");
+  await expect(
+    page.locator("main").getByRole("heading", { name: /your week in 60 seconds/i, level: 1 }),
+  ).toBeVisible();
+  // Headline number-strip cards anchor with their CardLabels.
+  await expect(page.getByText("drafts shipped", { exact: true })).toBeVisible();
+  await expect(page.getByText("lessons captured", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("decisions made", { exact: true })).toBeVisible();
+  await expect(page.getByText("anomalies", { exact: true })).toBeVisible();
+  // Right rail: render-as-video CTA
+  await expect(page.getByText("render as 60s video", { exact: true })).toBeVisible();
+});
+
 test("/members renders seeded membership row (catches silent-fail in fetchMembers)", async ({
   page,
 }) => {
