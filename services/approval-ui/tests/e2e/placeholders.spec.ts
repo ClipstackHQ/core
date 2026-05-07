@@ -60,6 +60,12 @@ test("/digest renders the 'your week in 60 seconds' surface with seeded aggregat
   await expect(page.getByText("anomalies", { exact: true })).toBeVisible();
   // Right rail: render-as-video CTA
   await expect(page.getByText("render as 60s video", { exact: true })).toBeVisible();
+  // Right rail: Managed-Agents narrate surface. CI doesn't set the MA
+  // env vars (the agent + environment are real billable resources, not
+  // a CI-time concern), so the NarrateButton renders its unconfigured
+  // explainer state. Asserting the copy keeps both states honest — if
+  // the surface accidentally goes missing the text vanishes.
+  await expect(page.getByText("Mira-narrated digest", { exact: true })).toBeVisible();
 });
 
 test("/workspace surfaces the brand-in-at-nine importer with seeded brand kit", async ({

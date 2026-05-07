@@ -23,6 +23,7 @@ import { and, desc, eq, gte, sql, isNotNull } from "drizzle-orm";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, CardHeader, CardLabel } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { NarrateButton } from "@/components/digest/NarrateButton";
 import { getSession } from "@/lib/api/session";
 import { withTenant } from "@/lib/db/client";
 import { drafts } from "@/lib/db/schema/drafts";
@@ -245,7 +246,18 @@ function formatImpressions(n: number | null): string {
 }
 
 export default async function DigestPage() {
-  const data = await fetchDigest();
+  const [data, session] = await Promise.all([fetchDigest(), getSession()]);
+  const companyId = session.activeCompanyId;
+
+  // Surface the Managed-Agents narrate button only when MA is wired
+  // server-side. Same env-var check the API route uses — keeps the
+  // button affordance honest (don't render a button that 200's-with-
+  // skipped on every click). The check happens at SSR time so the
+  // client component receives a boolean prop, not the raw env state.
+  const managedAgentsConfigured = Boolean(
+    process.env.MANAGED_AGENTS_DIGEST_AGENT_ID &&
+      process.env.MANAGED_AGENTS_ENVIRONMENT_ID,
+  );
 
   // Headline reads as a single sentence: "Your week — N drafts shipped,
   // M lessons captured, K decisions made." The 60-second-video framing
@@ -453,8 +465,20 @@ export default async function DigestPage() {
             </section>
           </div>
 
-          {/* Right rail: the script + render-as-video CTA */}
+          {/* Right rail: Mira narrate (MA) + render-as-video CTA + recommendations */}
           <aside className="space-y-4">
+            {/* Mira-narrated digest. First MA-driven UI surface in core/.
+                The button calls the digest agent on Anthropic's Managed
+                Agents stack and renders the 200-word recap inline. v2
+                of this surface (Hyperframes video render) shares the
+                same agent + session ID — captured for replay. */}
+            {companyId && (
+              <NarrateButton
+                companyId={companyId}
+                managedAgentsConfigured={managedAgentsConfigured}
+              />
+            )}
+
             <Card size="medium" tone="accent" className="flex flex-col">
               <CardHeader>
                 <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
